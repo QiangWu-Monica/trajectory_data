@@ -18,22 +18,8 @@
         let fileContents;
         const fileUrl = 'https://raw.githubusercontent.com/QiangWu-Monica/trajectory_data/main/result.txt';
 
-        await fetch(fileUrl)
-            .then(response => response.text())
-            .then(data => {
-                // Store the retrieved data as a variable
-                fileContents = data.toString();
-            })
-            .catch(error => {
-                console.error(error);
-            });
-
-        var resultArr = fileContents.split('\n');
-        var [particle_num, iterations] = resultArr[0].split(" ");
-        particle_num = parseInt(particle_num);
-        iterations = parseInt(iterations);
-        console.log(particle_num);
-        console.log(iterations);
+        var particle_num = 6
+        var iterations = 1000
 
         var idx = 0;
         var positions;
@@ -45,20 +31,20 @@
             dimensions: 500,
             atoms: {
                 count: particle_num, // Per Color
-                radius: 0.5
+                radius: 5
             },
             drawings: { // Drawing options can be expensive on performance
                 lines: false, // draw lines between atoms that arr effecting each other
                 circle: false, // draw atoms as circles
                 background: {
                     active: false,
-                    color: 'black'
+                    color: 'white'
                 },
             },
             rules: {},
             rulesArray: [],
             // colors: ['green', 'red', 'yellow', 'blue'],
-            colors: ['blue'],
+            colors: ['red'],
             time_scale: 1.0,
             viscosity: 0.7, // speed-dampening
             pulseDuration: 10,
@@ -257,12 +243,13 @@
         var total_v; // global velocity as a estimate of on-screen activity
 
         // Apply Rules ( How atoms interact with each other )
-        const applyRules = () => {
+        const applyRules = (resultArr) => {
             total_v = 0.;
             var a;
 
             // update positions now
             var particles = resultArr[idx].split(" ");
+            console.log(particles)
 
             var each_atom_idx = 0;
             while (each_atom_idx < atoms.length) {
@@ -298,16 +285,55 @@
 
         update();
 
+        /*for (let c = 0; c < 2000; c++) {
+            idx += 1;*/
+            /* await fetch(fileUrl)
+                .then(response => response.text())
+                .then(data => {
+                    // Store the retrieved data as a variable
+                    fileContents = data.toString();
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+            var resultArr = fileContents.split('\n');*/
+            /*applyRules()
+            settings.scene.controls.update()
+            settings.scene.renderer.render(settings.scene.scene, settings.scene.camera)
+            // Update Params
+            updateParams()
+            requestAnimationFrame(dummy)
+        }*/
+        function dummy() {
+        }
+
         function update() {
+            console.log(idx)
             // Apply Rules
             if (idx < iterations) {
                 idx += 1;
-                applyRules()
+                fetch(fileUrl)
+                .then(response => response.text())
+                .then(data => {
+                    // Store the retrieved data as a variable
+                    var fileContents = data.toString();
+                    var resultArr = fileContents.split('\n');
+                    applyRules(resultArr)
+                    settings.scene.controls.update()
+                    settings.scene.renderer.render(settings.scene.scene, settings.scene.camera)
+                    // Update Params
+                    updateParams()
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+
+                // applyRules()
                 // Draw Atoms
-                settings.scene.controls.update()
-                settings.scene.renderer.render(settings.scene.scene, settings.scene.camera)
+                // settings.scene.controls.update()
+                // settings.scene.renderer.render(settings.scene.scene, settings.scene.camera)
                 // Update Params
-                updateParams()
+                // updateParams()
                 requestAnimationFrame(update)
             }
         }
